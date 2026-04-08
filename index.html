@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>GRAPHICS.STUDIO | Digital Trade Engine</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@300;400;500;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;700;800&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;500;900&display=swap" rel="stylesheet">
+
+<style>
+/* ── CORE VARIABLES ── */
+:root {
+  --black: #050505;
+  --cream: #F4F0EA;
+  --red: #FF3300;
+  --white: #FFFFFF;
+  --gray: #111111;
+  --display: 'Bebas Neue', sans-serif;
+  --body: 'IBM Plex Mono', monospace;
+  --mono: 'Space Mono', monospace;
+  --border: 2px solid var(--black);
+  --header-height: 60px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; overflow-x: hidden; }
+body {
+  background: var(--cream); color: var(--black); font-family: var(--body);
+  cursor: crosshair; overflow-x: hidden; display: flex; flex-direction: column; 
+  min-height: 100vh; width: 100%;
+}
+
+/* ── NOISE TEXTURE ── */
+body::after {
+  content: ''; position: fixed; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none; z-index: 9999; opacity: 0.8;
+}
+
+/* ── GLOBAL ELEMENTS ── */
+a { text-decoration: none; color: inherit; cursor: crosshair; }
+ul { list-style: none; }
+.rule-tag {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.25em; text-transform: uppercase;
+  border: 1px solid currentColor; padding: 4px 12px; margin-bottom: 20px; font-weight: 700;
+}
+.scrambler { display: inline-block; }
+@keyframes terminalBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+.blink { animation: terminalBlink 1.2s step-end infinite; color: var(--red); }
+
+/* ── NAVIGATION ── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 90000;
+  background: var(--black); border-bottom: 2px solid var(--red);
+  display: flex; align-items: stretch; justify-content: space-between; height: var(--header-height);
+}
+.nav-logo {
+  font-family: var(--display); font-size: 24px; color: var(--cream);
+  padding: 0 28px; display: flex; align-items: center; border-right: 1px solid rgba(255,255,255,0.1); letter-spacing: 0.08em;
+}
+.nav-logo span { color: var(--red); }
+.nav-links { display: flex; align-items: center; gap: 0; overflow-x: auto; }
+.nav-link {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.2em; color: rgba(245,233,216,0.45); 
+  text-transform: uppercase; padding: 0 20px; height: 100%; display: flex; align-items: center;
+  border-right: 1px solid rgba(255,255,255,0.06); transition: all 0.2s; font-weight: 700;
+}
+.nav-link:hover, .nav-link.active-link { color: var(--red); background: rgba(255,255,255,0.05); }
+
+/* ── SPA ROUTING VIEWS ── */
+main { flex: 1 0 auto; width: 100%; padding-top: var(--header-height); }
+.view-section { display: none; opacity: 0; width: 100%; }
+.view-section.active { display: block; opacity: 1; animation: fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+@keyframes fadeUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+
+/* ── LAYOUT GRIDS ── */
+.panel-grid { display: grid; grid-template-columns: 350px 1fr; min-height: calc(100vh - var(--header-height)); }
+.sidebar-controls { background: var(--white); padding: 40px; border-right: var(--border); overflow-y: auto; }
+.main-stage { background: var(--cream); padding: 40px; position: relative; display: flex; flex-direction: column; }
+
+/* ── UI COMPONENTS ── */
+.sec-title { font-family: var(--display); font-size: 60px; line-height: 0.9; margin-bottom: 30px; text-transform: uppercase; }
+.field-group { margin-bottom: 25px; }
+.field-label { display: block; font-family: var(--mono); font-size: 10px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 10px; color: var(--black); }
+.input-field, .select-field { 
+  width: 100%; background: var(--cream); border: var(--border); padding: 14px; 
+  font-family: var(--body); font-size: 12px; transition: border-color 0.2s; outline: none; border-radius: 0;
+}
+.input-field:focus, .select-field:focus { border-color: var(--red); }
+.btn {
+  width: 100%; padding: 16px; background: var(--black); color: var(--cream); border: none;
+  font-family: var(--mono); font-size: 11px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase;
+  cursor: crosshair; transition: background 0.2s;
+}
+.btn:hover { background: var(--red); color: var(--white); }
+
+/* ── GENERATOR STAGE ── */
+.canvas-area {
+  flex-grow: 1; border: 2px dashed var(--black); background: #E8E4DF; 
+  display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; padding: 40px;
+}
+.loader { display: none; font-family: var(--mono); font-size: 12px; color: var(--red); letter-spacing: 0.2em; font-weight: 700; animation: terminalBlink 0.8s infinite; }
+.output-visual { max-width: 100%; max-height: 60vh; box-shadow: 15px 15px 0 rgba(0,0,0,0.1); transition: all 0.3s; }
+
+/* ── COLOR ENGINE ── */
+.palette-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0; border: var(--border); margin-top: 20px; }
+.color-swatch { 
+  height: 200px; display: flex; flex-direction: column; justify-content: flex-end; padding: 20px;
+  cursor: crosshair; transition: transform 0.2s; border-right: var(--border);
+}
+.color-swatch:last-child { border-right: none; }
+.color-swatch:hover { z-index: 2; transform: scale(1.02); box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+.hex-code { font-family: var(--mono); font-size: 12px; font-weight: 700; background: var(--white); color: var(--black); padding: 5px 10px; width: fit-content; border: 1px solid var(--black); }
+
+/* ── TYPOGRAPHY ENGINE ── */
+.typo-stage { background: var(--white); border: var(--border); padding: 60px; min-height: 500px; }
+.typo-display { font-size: 80px; line-height: 1; margin-bottom: 30px; word-break: break-word; }
+.typo-body { font-size: 16px; line-height: 1.8; max-width: 800px; column-count: 2; column-gap: 40px; }
+.typo-meta { font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; opacity: 0.5; margin-bottom: 20px; text-transform: uppercase; border-bottom: 1px solid var(--black); padding-bottom: 10px;}
+
+@media (max-width: 900px) {
+  .panel-grid { grid-template-columns: 1fr; }
+  .sidebar-controls { border-right: none; border-bottom: var(--border); padding: 20px; }
+  .main-stage { padding: 20px; }
+  .typo-body { column-count: 1; }
+  .palette-container { grid-template-columns: 1fr 1fr; }
+  .color-swatch { border-bottom: var(--border); }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo scrambler">GRAPHICS<span class="blink">_</span>STUDIO</div>
+  <div class="nav-links">
+    <a class="nav-link nav-trigger scrambler active-link" href="#generator" data-target="view-generator">Vector.Gen</a>
+    <a class="nav-link nav-trigger scrambler" href="#color" data-target="view-color">Color.Sync</a>
+    <a class="nav-link nav-trigger scrambler" href="#typography" data-target="view-typography">Font.Arch</a>
+  </div>
+</nav>
+
+<main>
+  <section id="view-generator" class="view-section active">
+    <div class="panel-grid">
+      <div class="sidebar-controls">
+        <h2 class="sec-title">ASSET<br>ENGINE</h2>
+        <div class="rule-tag scrambler" style="color:var(--red); border-color:var(--red);">AUTOMATED LOGIC</div>
+        
+        <form id="generator-form">
+          <div class="field-group">
+            <label class="field-label scrambler">Brand / Business Name</label>
+            <input type="text" id="brand-name" class="input-field" placeholder="e.g. ATHREX ENERGY" required>
+          </div>
+          
+          <div class="field-group">
+            <label class="field-label scrambler">Core Keyword (Source)</label>
+            <input type="text" id="brand-keyword" class="input-field" placeholder="e.g. Solar, Tech, Apparel" required>
+          </div>
+          
+          <div class="field-group">
+            <label class="field-label scrambler">Output Architecture</label>
+            <select id="output-type" class="select-field">
+              <option value="logo">Vector Logo (SVG)</option>
+              <option value="poster">Brand Poster Layout</option>
+              <option value="apparel">Apparel / T-Shirt Graphic</option>
+            </select>
+          </div>
+
+          <div class="field-group">
+            <label class="field-label scrambler">Aesthetic Profile</label>
+            <select id="aesthetic-style" class="select-field">
+              <option value="minimal">Minimalist Brutalism</option>
+              <option value="tech">High-Tech / Cyber</option>
+              <option value="luxury">Modern Luxury</option>
+            </select>
+          </div>
+
+          <button type="submit" class="btn scrambler">Execute Generation</button>
+        </form>
+      </div>
+      
+      <div class="main-stage">
+        <div class="canvas-area" id="canvas-container">
+          <div class="loader" id="gen-loader">COMPILING VECTOR DATA...<span class="blink">_</span></div>
+          <div id="output-wrapper" style="width: 100%; height: 100%; display: flex; justify-content: center; align-items: center;">
+            <div style="font-family:var(--mono); font-size:10px; color:rgba(0,0,0,0.3); letter-spacing:0.2em; text-transform:uppercase;">AWAITING PARAMETERS</div>
+          </div>
+        </div>
+        <div style="margin-top: 20px; display: flex; justify-content: space-between; align-items: center;">
+          <div style="font-family:var(--mono); font-size:10px; letter-spacing:0.2em; color:var(--red); font-weight: 700;">> OUTPUT_LOG: STANDBY</div>
+          <button id="download-btn" class="btn" style="width: auto; padding: 10px 20px; display: none;">Export SVG</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="view-color" class="view-section">
+    <div class="panel-grid">
+      <div class="sidebar-controls">
+        <h2 class="sec-title">COLOR<br>SYNC</h2>
+        <p style="font-size: 12px; margin-bottom: 30px; opacity: 0.7;">Algorithmic color pairing based on structural harmony rules. Generate cohesive palettes for digital and print infrastructure.</p>
+        
+        <div class="field-group">
+          <label class="field-label scrambler">Harmony Rule</label>
+          <select id="color-rule" class="select-field">
+            <option value="monochrome">Monochromatic</option>
+            <option value="analogous">Analogous</option>
+            <option value="complementary">High Contrast (Complementary)</option>
+            <option value="brutalist">Brutalist / Cyber</option>
+          </select>
+        </div>
+        
+        <button id="generate-colors-btn" class="btn scrambler">Calculate Harmony</button>
+      </div>
+      
+      <div class="main-stage">
+        <div class="rule-tag scrambler">ACTIVE PALETTE</div>
+        <div class="palette-container" id="palette-output">
+          </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="view-typography" class="view-section">
+    <div class="panel-grid">
+      <div class="sidebar-controls">
+        <h2 class="sec-title">FONT<br>ARCH</h2>
+        <p style="font-size: 12px; margin-bottom: 30px; opacity: 0.7;">Advanced typography staging. Test display and body font structural pairings in real-time.</p>
+        
+        <div class="field-group">
+          <label class="field-label scrambler">Headline / Display Font</label>
+          <select id="font-display-select" class="select-field">
+            <option value="'Bebas Neue', sans-serif">Bebas Neue (Structural)</option>
+            <option value="'Syne', sans-serif">Syne (Modernist)</option>
+            <option value="'Playfair Display', serif">Playfair (Editorial)</option>
+            <option value="'Inter', sans-serif">Inter (Utilitarian)</option>
+          </select>
+        </div>
+        
+        <div class="field-group">
+          <label class="field-label scrambler">Paragraph / Body Font</label>
+          <select id="font-body-select" class="select-field">
+            <option value="'IBM Plex Mono', monospace">IBM Plex Mono (Technical)</option>
+            <option value="'Inter', sans-serif">Inter (Legibility)</option>
+            <option value="'Space Mono', monospace">Space Mono (Terminal)</option>
+          </select>
+        </div>
+
+        <div class="field-group" style="margin-top: 40px;">
+          <label class="field-label scrambler">Test String</label>
+          <input type="text" id="typo-test-input" class="input-field" value="Constructing Digital Dominance">
+        </div>
+      </div>
+      
+      <div class="main-stage" style="background: #E8E4DF;">
+        <div class="typo-stage">
+          <div class="typo-meta" id="typo-meta-display">DISPLAY: BEBAS NEUE // BODY: IBM PLEX MONO</div>
+          <div class="typo-display" id="typo-headline">CONSTRUCTING DIGITAL DOMINANCE</div>
+          <div class="typo-body" id="typo-paragraph">
+            At Digital Trade, we don't just create images; we build structural visual systems. Bridging the gap between raw creativity and engineered functionality. Clutter kills conversion. We strip away the unnecessary to deploy high-performance websites and striking graphic identities that scale brands globally. Form follows function. Every pixel, every line of code, and every vector curve must serve a distinct purpose in driving user action. Relentless iteration ensures we build systems that are modular, scalable, and ready to pivot when market dynamics shift.
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+  // --- 1. SPA ROUTING ---
+  const views = document.querySelectorAll('.view-section');
+  const navLinks = document.querySelectorAll('.nav-link');
+
+  function navigateTo(targetId) {
+      views.forEach(v => v.classList.remove('active'));
+      const targetView = document.getElementById(targetId);
+      if(targetView) {
+          void targetView.offsetWidth; // trigger reflow
+          targetView.classList.add('active');
+      }
+      navLinks.forEach(a => a.classList.remove('active-link'));
+      const activeLink = document.querySelector(`.nav-link[data-target="${targetId}"]`);
+      if(activeLink) activeLink.classList.add('active-link');
+  }
+
+  document.querySelectorAll('.nav-trigger').forEach(trigger => {
+      trigger.addEventListener('click', function(e) {
+          e.preventDefault();
+          const targetId = this.getAttribute('data-target');
+          navigateTo(targetId);
+      });
+  });
+
+  // --- 2. SCRAMBLER EFFECT ---
+  const chars = '!<>-_/[]{}*^?#';
+  document.querySelectorAll('.scrambler').forEach(el => {
+      const originalText = el.innerText;
+      el.addEventListener('mouseover', () => {
+          if(el.dataset.animating === 'true') return;
+          el.dataset.animating = 'true';
+          let iterations = 0;
+          const maxIterations = originalText.length;
+          const step = Math.max(0.3, maxIterations / 12); 
+          const interval = setInterval(() => {
+              el.innerText = originalText.split('').map((letter, index) => {
+                  if(index < iterations) return originalText[index];
+                  if(originalText[index] === ' ') return ' ';
+                  return chars[Math.floor(Math.random() * chars.length)];
+              }).join('');
+              if(iterations >= maxIterations) {
+                  clearInterval(interval);
+                  el.innerText = originalText;
+                  el.dataset.animating = 'false';
+              }
+              iterations += step;
+          }, 30);
+      });
+  });
+
+  // --- 3. GENERATOR LOGIC (SIMULATED DOM/SVG BUILDER) ---
+  const genForm = document.getElementById('generator-form');
+  const loader = document.getElementById('gen-loader');
+  const outputWrapper = document.getElementById('output-wrapper');
+  const downloadBtn = document.getElementById('download-btn');
+
+  genForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const name = document.getElementById('brand-name').value.toUpperCase();
+    const keyword = document.getElementById('brand-keyword').value.toUpperCase();
+    const type = document.getElementById('output-type').value;
+    const style = document.getElementById('aesthetic-style').value;
+
+    // Show Loader
+    outputWrapper.style.display = 'none';
+    downloadBtn.style.display = 'none';
+    loader.style.display = 'block';
+
+    // Simulate API/Generation Delay
+    setTimeout(() => {
+      loader.style.display = 'none';
+      outputWrapper.style.display = 'flex';
+      downloadBtn.style.display = 'block';
+      generateSVG(name, keyword, type, style);
+    }, 1500);
+  });
+
+  function generateSVG(name, keyword, type, style) {
+    let svgContent = '';
+    const initial = name.charAt(0);
+    
+    // Style configurations
+    let bgCol = style === 'minimal' ? '#F4F0EA' : (style === 'tech' ? '#050505' : '#1A1A1A');
+    let fgCol = style === 'minimal' ? '#050505' : (style === 'tech' ? '#00FF41' : '#D4AF37');
+    let accentCol = style === 'minimal' ? '#FF3300' : (style === 'tech' ? '#FFFFFF' : '#FFFFFF');
+    let fontFam = style === 'luxury' ? 'Playfair Display, serif' : 'Bebas Neue, sans-serif';
+
+    if (type === 'logo') {
+      svgContent = `
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="100%" height="100%" class="output-visual" style="max-width:400px; background:${bgCol}; border:2px solid #000;">
+          <rect width="500" height="500" fill="${bgCol}"/>
+          <circle cx="250" cy="200" r="120" fill="none" stroke="${accentCol}" stroke-width="8"/>
+          <text x="250" y="240" font-family="${fontFam}" font-size="140" fill="${fgCol}" font-weight="bold" text-anchor="middle">${initial}</text>
+          <text x="250" y="380" font-family="Space Mono, monospace" font-size="30" fill="${fgCol}" font-weight="bold" letter-spacing="10" text-anchor="middle">${name}</text>
+          <text x="250" y="420" font-family="Space Mono, monospace" font-size="14" fill="${accentCol}" letter-spacing="5" text-anchor="middle">IND // ${keyword}</text>
+        </svg>`;
+    } else if (type === 'poster') {
+      svgContent = `
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 800" width="100%" height="100%" class="output-visual" style="max-height: 100%; background:${bgCol}; border:2px solid #000;">
+          <rect width="600" height="800" fill="${bgCol}"/>
+          <rect x="40" y="40" width="520" height="720" fill="none" stroke="${fgCol}" stroke-width="2"/>
+          <text x="50" y="100" font-family="Space Mono, monospace" font-size="16" fill="${accentCol}" letter-spacing="2">SYS.OP // ${keyword}</text>
+          <text x="50" y="300" font-family="${fontFam}" font-size="110" fill="${fgCol}" font-weight="bold" letter-spacing="0">${name.substring(0,6)}</text>
+          <text x="50" y="400" font-family="${fontFam}" font-size="110" fill="${fgCol}" font-weight="bold" letter-spacing="0">${name.substring(6,12) || 'SYS'}</text>
+          <circle cx="480" cy="680" r="40" fill="${accentCol}"/>
+          <path d="M 50 700 L 400 700" stroke="${fgCol}" stroke-width="4"/>
+        </svg>`;
+    } else {
+      // Apparel
+      svgContent = `
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 500" width="100%" height="100%" class="output-visual" style="max-width:350px; background:${bgCol}; border:2px solid #000;">
+          <rect width="400" height="500" fill="${bgCol}"/>
+          <text x="200" y="100" font-family="Space Mono, monospace" font-size="12" fill="${accentCol}" letter-spacing="5" text-anchor="middle">EST. 2026</text>
+          <text x="200" y="250" font-family="${fontFam}" font-size="80" fill="${fgCol}" font-weight="bold" text-anchor="middle" transform="rotate(-10 200 250)">${name}</text>
+          <rect x="100" y="350" width="200" height="60" fill="none" stroke="${fgCol}" stroke-width="3"/>
+          <text x="200" y="385" font-family="Space Mono, monospace" font-size="18" fill="${fgCol}" font-weight="bold" letter-spacing="4" text-anchor="middle">${keyword}</text>
+        </svg>`;
+    }
+    
+    outputWrapper.innerHTML = svgContent;
+  }
+
+  // --- 4. COLOR HARMONY LOGIC ---
+  const colorBtn = document.getElementById('generate-colors-btn');
+  const paletteOutput = document.getElementById('palette-output');
+  const ruleSelect = document.getElementById('color-rule');
+
+  // Hardcoded curated palettes for demonstration of logic
+  const palettes = {
+    monochrome: [['#1A1A1A', '#333333', '#666666', '#999999', '#CCCCCC']],
+    analogous: [['#FF3300', '#FF6600', '#FF9900', '#FFCC00', '#1A1A1A']],
+    complementary: [['#050505', '#F4F0EA', '#FF3300', '#00E5FF', '#111111']],
+    brutalist: [['#000000', '#FFFFFF', '#FF0000', '#00FF00', '#0000FF']]
+  };
+
+  function renderPalette(rule) {
+    const list = palettes[rule][0];
+    paletteOutput.innerHTML = '';
+    list.forEach(hex => {
+      const isDark = parseInt(hex.replace('#', ''), 16) < 0xffffff / 2;
+      const textCol = isDark ? '#FFF' : '#000';
+      const div = document.createElement('div');
+      div.className = 'color-swatch';
+      div.style.backgroundColor = hex;
+      div.innerHTML = `<span class="hex-code" style="color:${textCol}; background:transparent; border-color:${textCol};">${hex}</span>`;
+      paletteOutput.appendChild(div);
+    });
+  }
+  
+  colorBtn.addEventListener('click', () => {
+    renderPalette(ruleSelect.value);
+  });
+  
+  // Init default palette
+  renderPalette('brutalist');
+
+  // --- 5. TYPOGRAPHY ENGINE ---
+  const displaySelect = document.getElementById('font-display-select');
+  const bodySelect = document.getElementById('font-body-select');
+  const testInput = document.getElementById('typo-test-input');
+  
+  const headlineEl = document.getElementById('typo-headline');
+  const bodyEl = document.getElementById('typo-paragraph');
+  const metaEl = document.getElementById('typo-meta-display');
+
+  function updateTypo() {
+    const displayFont = displaySelect.value;
+    const bodyFont = bodySelect.value;
+    
+    headlineEl.style.fontFamily = displayFont;
+    bodyEl.style.fontFamily = bodyFont;
+    headlineEl.innerText = testInput.value || "CONSTRUCTING DIGITAL DOMINANCE";
+    
+    // Update meta text
+    const dName = displaySelect.options[displaySelect.selectedIndex].text.split('(')[0].trim().toUpperCase();
+    const bName = bodySelect.options[bodySelect.selectedIndex].text.split('(')[0].trim().toUpperCase();
+    metaEl.innerText = `DISPLAY: ${dName} // BODY: ${bName}`;
+  }
+
+  displaySelect.addEventListener('change', updateTypo);
+  bodySelect.addEventListener('change', updateTypo);
+  testInput.addEventListener('input', updateTypo);
+
+});
+</script>
+</body>
+</html>
