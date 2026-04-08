@@ -3,114 +3,123 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>GRAPHICS.STUDIO | Advanced Architecture</title>
+<title>GRAPHICS.STUDIO | Procedural Engine</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@300;400;500;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
 
 <style>
-/* ── CORE VARIABLES ── */
+/* ── DYNAMIC CSS VARIABLES (GLOBAL OVERRIDE CAPABLE) ── */
 :root {
-  --black: #050505;
-  --cream: #F4F0EA;
-  --red: #FF3300;
-  --white: #FFFFFF;
-  --gray: #111111;
-  --display: 'Bebas Neue', sans-serif;
-  --body: 'IBM Plex Mono', monospace;
-  --mono: 'Space Mono', monospace;
-  --border: 2px solid var(--black);
+  --bg-color: #F4F0EA;
+  --fg-color: #050505;
+  --accent-color: #FF3300;
+  --display-font: 'Bebas Neue', sans-serif;
+  --body-font: 'IBM Plex Mono', monospace;
+  --mono-font: 'Space Mono', monospace;
+  --border: 2px solid var(--fg-color);
   --header-height: 60px;
 }
 
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; transition: background-color 0.4s, color 0.4s, border-color 0.4s; }
 html { scroll-behavior: smooth; overflow-x: hidden; }
 body {
-  background: var(--cream); color: var(--black); font-family: var(--body);
+  background: var(--bg-color); color: var(--fg-color); font-family: var(--body-font);
   cursor: crosshair; overflow-x: hidden; display: flex; flex-direction: column; 
-  min-height: 100vh; width: 100%;
+  min-height: 100vh; width: 100%; transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
 }
 
 /* ── NOISE TEXTURE ── */
 body::after {
   content: ''; position: fixed; inset: 0;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-  pointer-events: none; z-index: 9999; opacity: 0.8;
+  pointer-events: none; z-index: 9999; opacity: 0.8; mix-blend-mode: multiply;
 }
 
 /* ── GLOBAL ELEMENTS ── */
 a { text-decoration: none; color: inherit; cursor: crosshair; }
-ul { list-style: none; }
 .rule-tag {
   display: inline-flex; align-items: center; gap: 8px;
-  font-family: var(--mono); font-size: 10px; letter-spacing: 0.25em; text-transform: uppercase;
+  font-family: var(--mono-font); font-size: 10px; letter-spacing: 0.25em; text-transform: uppercase;
   border: 1px solid currentColor; padding: 4px 12px; margin-bottom: 20px; font-weight: 700;
 }
 .scrambler { display: inline-block; }
 @keyframes terminalBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
-.blink { animation: terminalBlink 1.2s step-end infinite; color: var(--red); }
+.blink { animation: terminalBlink 1.2s step-end infinite; color: var(--accent-color); }
 
 /* ── NAVIGATION ── */
 nav {
   position: fixed; top: 0; left: 0; right: 0; z-index: 90000;
-  background: var(--black); border-bottom: 2px solid var(--red);
+  background: var(--fg-color); border-bottom: 2px solid var(--accent-color);
   display: flex; align-items: stretch; justify-content: flex-start; height: var(--header-height);
 }
 .nav-logo {
-  font-family: var(--display); font-size: 24px; color: var(--cream);
+  font-family: var(--display-font); font-size: 24px; color: var(--bg-color);
   padding: 0 20px; display: flex; align-items: center; border-right: 1px solid rgba(255,255,255,0.1); letter-spacing: 0.08em;
   white-space: nowrap; flex-shrink: 0;
 }
-.nav-logo span { color: var(--red); }
-.nav-links { 
-  display: flex; align-items: center; gap: 0; overflow-x: auto; flex-grow: 1;
-  scrollbar-width: none; /* Firefox */
-}
-.nav-links::-webkit-scrollbar { display: none; } /* Chrome */
+.nav-logo span { color: var(--accent-color); }
+.nav-links { display: flex; align-items: center; gap: 0; overflow-x: auto; flex-grow: 1; scrollbar-width: none; }
+.nav-links::-webkit-scrollbar { display: none; }
 .nav-link {
-  font-family: var(--mono); font-size: 10px; letter-spacing: 0.2em; color: rgba(245,233,216,0.45); 
+  font-family: var(--mono-font); font-size: 10px; letter-spacing: 0.2em; color: rgba(255,255,255,0.5); 
   text-transform: uppercase; padding: 0 20px; height: 100%; display: flex; align-items: center;
-  border-right: 1px solid rgba(255,255,255,0.06); transition: all 0.2s; font-weight: 700; white-space: nowrap;
+  border-right: 1px solid rgba(255,255,255,0.06); transition: all 0.2s; font-weight: 700; white-space: nowrap; cursor: pointer;
 }
-.nav-link:hover, .nav-link.active-link { color: var(--red); background: rgba(255,255,255,0.05); }
+.nav-link:hover, .nav-link.active-link { color: var(--accent-color); background: rgba(255,255,255,0.05); }
+
+/* Global Override Toggle */
+.global-toggle-wrapper { margin-left: auto; display: flex; align-items: center; padding: 0 20px; border-left: 1px solid rgba(255,255,255,0.1); }
+.global-toggle-label { font-family: var(--mono-font); font-size: 9px; color: var(--bg-color); letter-spacing: 0.2em; margin-right: 10px; text-transform: uppercase;}
+.switch { position: relative; display: inline-block; width: 40px; height: 20px; }
+.switch input { opacity: 0; width: 0; height: 0; }
+.slider { position: absolute; cursor: crosshair; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(255,255,255,0.2); transition: .4s; }
+.slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: var(--bg-color); transition: .4s; }
+input:checked + .slider { background-color: var(--accent-color); }
+input:checked + .slider:before { transform: translateX(20px); }
 
 /* ── SPA ROUTING VIEWS ── */
 main { flex: 1 0 auto; width: 100%; padding-top: var(--header-height); }
 .view-section { display: none; opacity: 0; width: 100%; }
-.view-section.active { display: block; opacity: 1; animation: fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+.view-section.active { display: block; opacity: 1; animation: fadeUp 0.5s ease forwards; }
 @keyframes fadeUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
 
 /* ── LAYOUT GRIDS ── */
 .panel-grid { display: grid; grid-template-columns: 350px 1fr; min-height: calc(100vh - var(--header-height)); }
-.sidebar-controls { background: var(--white); padding: 30px; border-right: var(--border); overflow-y: auto; z-index: 2; position: relative;}
-.main-stage { background: var(--cream); padding: 30px; position: relative; display: flex; flex-direction: column; overflow-x: hidden; }
+.sidebar-controls { background: var(--bg-color); padding: 30px; border-right: var(--border); overflow-y: auto; z-index: 2; position: relative;}
+.main-stage { background: var(--bg-color); padding: 30px; position: relative; display: flex; flex-direction: column; overflow-x: hidden; }
 
 /* ── UI COMPONENTS ── */
-.sec-title { font-family: var(--display); font-size: clamp(40px, 6vw, 60px); line-height: 0.9; margin-bottom: 20px; text-transform: uppercase; }
+.sec-title { font-family: var(--display-font); font-size: clamp(40px, 6vw, 60px); line-height: 0.9; margin-bottom: 20px; text-transform: uppercase; color: var(--fg-color); }
 .field-group { margin-bottom: 20px; }
-.field-label { display: block; font-family: var(--mono); font-size: 10px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 8px; color: var(--black); }
+.field-label { display: block; font-family: var(--mono-font); font-size: 10px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 8px; color: var(--fg-color); opacity: 0.8; }
 .input-field, .select-field { 
-  width: 100%; background: var(--cream); border: var(--border); padding: 12px; 
-  font-family: var(--body); font-size: 12px; transition: border-color 0.2s; outline: none; border-radius: 0;
+  width: 100%; background: transparent; border: var(--border); padding: 12px; color: var(--fg-color);
+  font-family: var(--body-font); font-size: 12px; transition: border-color 0.2s; outline: none; border-radius: 0;
 }
-.input-field:focus, .select-field:focus { border-color: var(--red); }
+.input-field:focus, .select-field:focus { border-color: var(--accent-color); }
+
 .btn {
-  width: 100%; padding: 16px; background: var(--black); color: var(--cream); border: none;
-  font-family: var(--mono); font-size: 11px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase;
-  cursor: crosshair; transition: background 0.2s; margin-bottom: 10px;
+  width: 100%; padding: 16px; background: var(--fg-color); color: var(--bg-color); border: none;
+  font-family: var(--mono-font); font-size: 11px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase;
+  cursor: crosshair; transition: background 0.2s, color 0.2s; margin-bottom: 10px; border: 2px solid var(--fg-color);
 }
-.btn:hover { background: var(--red); color: var(--white); }
-.btn-outline { background: transparent; color: var(--black); border: 2px solid var(--black); }
-.btn-outline:hover { background: var(--black); color: var(--cream); }
+.btn:hover { background: var(--accent-color); color: var(--bg-color); border-color: var(--accent-color); }
+.btn-outline { background: transparent; color: var(--fg-color); border: 2px solid var(--fg-color); }
+.btn-outline:hover { background: var(--fg-color); color: var(--bg-color); }
 
 /* ── GENERATOR STAGE ── */
 .canvas-area {
-  flex-grow: 1; border: 2px dashed var(--black); background: #E8E4DF; 
+  flex-grow: 1; border: 2px dashed var(--fg-color); background: transparent; 
   display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; padding: 20px; min-height: 50vh;
 }
-.loader { display: none; font-family: var(--mono); font-size: 12px; color: var(--red); letter-spacing: 0.2em; font-weight: 700; animation: terminalBlink 0.8s infinite; text-align: center; }
+.loader { display: none; font-family: var(--mono-font); font-size: 12px; color: var(--accent-color); letter-spacing: 0.2em; font-weight: 700; animation: terminalBlink 0.8s infinite; text-align: center; }
 .output-visual { max-width: 100%; height: auto; max-height: 65vh; box-shadow: 15px 15px 0 rgba(0,0,0,0.1); transition: all 0.3s; }
+
+/* ── EXPORT MENU ── */
+.export-group { display: flex; gap: 10px; width: 100%; display: none; }
+.export-group .btn { margin: 0; }
 
 /* ── COLOR ENGINE ── */
 .palette-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 0; border: var(--border); margin-top: 20px; }
@@ -120,13 +129,13 @@ main { flex: 1 0 auto; width: 100%; padding-top: var(--header-height); }
 }
 .color-swatch:last-child { border-right: none; }
 .color-swatch:hover { z-index: 2; transform: scale(1.05); box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
-.hex-code { font-family: var(--mono); font-size: 10px; font-weight: 700; background: var(--white); color: var(--black); padding: 4px 8px; width: fit-content; border: 1px solid var(--black); }
+.hex-code { font-family: var(--mono-font); font-size: 10px; font-weight: 700; background: var(--bg-color); color: var(--fg-color); padding: 4px 8px; width: fit-content; border: 1px solid currentColor; }
 
 /* ── TYPOGRAPHY ENGINE ── */
-.typo-stage { background: var(--white); border: var(--border); padding: clamp(20px, 5vw, 60px); min-height: 500px; display: flex; flex-direction: column; transition: background 0.3s; }
-.typo-display { font-size: clamp(40px, 8vw, 90px); line-height: 1; margin-bottom: 30px; word-break: break-word; transition: color 0.3s; }
-.typo-body { font-size: clamp(14px, 2vw, 16px); line-height: 1.8; max-width: 800px; column-count: 2; column-gap: 40px; transition: color 0.3s; }
-.typo-meta { font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; opacity: 0.6; margin-bottom: 20px; text-transform: uppercase; border-bottom: 1px solid currentColor; padding-bottom: 10px;}
+.typo-stage { background: transparent; border: var(--border); padding: clamp(20px, 5vw, 60px); min-height: 500px; display: flex; flex-direction: column; }
+.typo-display { font-family: var(--display-font); font-size: clamp(40px, 8vw, 90px); line-height: 1; margin-bottom: 30px; word-break: break-word; color: var(--fg-color); }
+.typo-body { font-family: var(--body-font); font-size: clamp(14px, 2vw, 16px); line-height: 1.8; max-width: 800px; column-count: 2; column-gap: 40px; color: var(--fg-color); opacity: 0.9; }
+.typo-meta { font-family: var(--mono-font); font-size: 10px; letter-spacing: 0.1em; opacity: 0.6; margin-bottom: 20px; text-transform: uppercase; border-bottom: 1px solid currentColor; padding-bottom: 10px; color: var(--fg-color);}
 
 /* ── RESPONSIVE ── */
 @media (max-width: 900px) {
@@ -137,6 +146,7 @@ main { flex: 1 0 auto; width: 100%; padding-top: var(--header-height); }
   .palette-container { grid-template-columns: 1fr 1fr; }
   .color-swatch { border-bottom: var(--border); min-height: 120px; }
   .color-swatch:nth-child(even) { border-right: none; }
+  .global-toggle-label { display: none; }
 }
 </style>
 </head>
@@ -145,9 +155,16 @@ main { flex: 1 0 auto; width: 100%; padding-top: var(--header-height); }
 <nav>
   <div class="nav-logo scrambler">GRAPHICS<span class="blink">_</span>STUDIO</div>
   <div class="nav-links">
-    <a class="nav-link nav-trigger scrambler active-link" href="#generator" data-target="view-generator">Vector.Gen</a>
-    <a class="nav-link nav-trigger scrambler" href="#color" data-target="view-color">Color.Sync</a>
-    <a class="nav-link nav-trigger scrambler" href="#typography" data-target="view-typography">Font.Arch</a>
+    <a class="nav-link nav-trigger scrambler active-link" data-target="view-generator">Vector.Gen</a>
+    <a class="nav-link nav-trigger scrambler" data-target="view-color">Color.Sync</a>
+    <a class="nav-link nav-trigger scrambler" data-target="view-typography">Font.Arch</a>
+  </div>
+  <div class="global-toggle-wrapper">
+    <span class="global-toggle-label">Global UI Sync</span>
+    <label class="switch">
+      <input type="checkbox" id="global-override-toggle">
+      <span class="slider"></span>
+    </label>
   </div>
 </nav>
 
@@ -155,57 +172,46 @@ main { flex: 1 0 auto; width: 100%; padding-top: var(--header-height); }
   <section id="view-generator" class="view-section active">
     <div class="panel-grid">
       <div class="sidebar-controls">
-        <h2 class="sec-title">ASSET<br>ENGINE</h2>
-        <div class="rule-tag scrambler" style="color:var(--red); border-color:var(--red);">AUTOMATED LOGIC</div>
+        <h2 class="sec-title">PROCEDURAL<br>ENGINE</h2>
+        <p style="font-size: 12px; margin-bottom: 30px; opacity: 0.7;">Infinite mathematical vector generation. Adjust parameters and compute.</p>
         
         <form id="generator-form">
           <div class="field-group">
-            <label class="field-label scrambler">Brand / Business Name</label>
-            <input type="text" id="brand-name" class="input-field" placeholder="e.g. DIGITAL TRADE" required>
+            <label class="field-label scrambler">Brand / Callsign</label>
+            <input type="text" id="brand-name" class="input-field" value="DIGITAL TRADE" required>
           </div>
           
           <div class="field-group">
-            <label class="field-label scrambler">Core Keyword (Source)</label>
-            <input type="text" id="brand-keyword" class="input-field" placeholder="e.g. Design, Tech, Solar" required>
+            <label class="field-label scrambler">Core Keyword</label>
+            <input type="text" id="brand-keyword" class="input-field" value="ARCHITECTURE" required>
           </div>
           
           <div class="field-group">
-            <label class="field-label scrambler">Output Architecture</label>
+            <label class="field-label scrambler">Structural Format</label>
             <select id="output-type" class="select-field">
-              <option value="logo">Vector Logo (SVG)</option>
-              <option value="bcard">Business Card (Front/Back)</option>
-              <option value="poster">Brand Poster Layout</option>
-              <option value="flyer">Event Flyer</option>
-              <option value="brochure">Tri-Fold Brochure Blueprint</option>
-              <option value="apparel">Apparel / T-Shirt Graphic</option>
+              <option value="abstract">Infinite Abstract Graphic</option>
+              <option value="logo">Procedural Logo System</option>
+              <option value="poster">Grid-Based Poster</option>
             </select>
           </div>
 
-          <div class="field-group">
-            <label class="field-label scrambler">Aesthetic Profile</label>
-            <select id="aesthetic-style" class="select-field">
-              <option value="minimal">Minimalist Brutalism</option>
-              <option value="tech">High-Tech / Cyber</option>
-              <option value="luxury">Modern Luxury</option>
-            </select>
-          </div>
-
-          <button type="submit" class="btn scrambler">Execute Generation</button>
+          <button type="submit" class="btn scrambler">Compute Vectors</button>
         </form>
+        
+        <div class="export-group" id="export-controls" style="margin-top: 20px;">
+          <button id="export-svg" class="btn btn-outline scrambler" style="flex: 1;">SVG</button>
+          <button id="export-png" class="btn btn-outline scrambler" style="flex: 1;">PNG</button>
+        </div>
       </div>
       
       <div class="main-stage">
         <div class="canvas-area" id="canvas-container">
-          <div class="loader" id="gen-loader">COMPILING VECTOR DATA...<br><span class="blink" style="font-size: 24px; margin-top: 10px; display: block;">///</span></div>
+          <div class="loader" id="gen-loader">CALCULATING VECTORS...<br><span class="blink" style="font-size: 24px; margin-top: 10px; display: block;">///</span></div>
           <div id="output-wrapper" style="width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; flex-direction: column;">
-            <div style="font-family:var(--mono); font-size:10px; color:rgba(0,0,0,0.3); letter-spacing:0.2em; text-transform:uppercase;">AWAITING PARAMETERS</div>
+            <div style="font-family:var(--mono-font); font-size:10px; color:var(--fg-color); opacity: 0.3; letter-spacing:0.2em; text-transform:uppercase;">AWAITING PARAMETERS</div>
           </div>
         </div>
-        <div style="margin-top: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-          <div style="font-family:var(--mono); font-size:10px; letter-spacing:0.2em; color:var(--red); font-weight: 700;">> OUTPUT_LOG: STANDBY</div>
-          <button id="download-btn" class="btn" style="width: auto; padding: 10px 20px; display: none; margin: 0;">Export SVG</button>
-        </div>
-      </div>
+        <canvas id="render-canvas" style="display: none;"></canvas> </div>
     </div>
   </section>
 
@@ -213,19 +219,11 @@ main { flex: 1 0 auto; width: 100%; padding-top: var(--header-height); }
     <div class="panel-grid">
       <div class="sidebar-controls">
         <h2 class="sec-title">COLOR<br>SYNC</h2>
-        <p style="font-size: 12px; margin-bottom: 30px; opacity: 0.7;">Algorithmic color pairing. Generate cohesive palettes or infinite random duotones for digital and print infrastructure.</p>
+        <p style="font-size: 12px; margin-bottom: 30px; opacity: 0.7;">Algorithmic color engine. If "Global UI Sync" is active, colors apply instantly to the app interface.</p>
         
-        <div class="field-group">
-          <label class="field-label scrambler">Harmony Rule</label>
-          <select id="color-rule" class="select-field">
-            <option value="duotone">Infinite Duotone (2 Colors)</option>
-            <option value="random-multi">Infinite Full Palette (5 Colors)</option>
-            <option value="monochrome">Monochromatic Base</option>
-            <option value="brutalist">Strict Brutalist</option>
-          </select>
-        </div>
-        
-        <button id="generate-colors-btn" class="btn scrambler">Calculate / Randomize</button>
+        <button id="generate-duotone-btn" class="btn scrambler">Infinite Duotone (2 Colors)</button>
+        <button id="generate-multi-btn" class="btn btn-outline scrambler">Infinite Palette (5 Colors)</button>
+        <button id="reset-color-btn" class="btn btn-outline scrambler" style="border-color: var(--accent-color); color: var(--accent-color); margin-top: 20px;">Reset UI Colors</button>
       </div>
       
       <div class="main-stage">
@@ -240,40 +238,23 @@ main { flex: 1 0 auto; width: 100%; padding-top: var(--header-height); }
     <div class="panel-grid">
       <div class="sidebar-controls">
         <h2 class="sec-title">FONT<br>ARCH</h2>
-        <p style="font-size: 12px; margin-bottom: 30px; opacity: 0.7;">Advanced typography staging. Test display and body font structures across an infinite combination of Google Fonts.</p>
+        <p style="font-size: 12px; margin-bottom: 30px; opacity: 0.7;">Pulls from an infinite array of Google Fonts. If "Global UI Sync" is active, typography overrides the entire system.</p>
         
         <div class="field-group">
           <label class="field-label scrambler">Test String</label>
-          <input type="text" id="typo-test-input" class="input-field" value="Architectural Precision">
+          <input type="text" id="typo-test-input" class="input-field" value="INDRAJEET PISDA">
         </div>
 
-        <button id="randomize-fonts-btn" class="btn scrambler">Infinite Random Pairing</button>
-        <button id="randomize-typo-color-btn" class="btn btn-outline scrambler">Randomize Duotone Mode</button>
-        
-        <div style="margin-top: 30px; padding-top: 20px; border-top: 1px dashed var(--black);">
-          <div style="font-family:var(--mono); font-size:9px; letter-spacing:0.2em; opacity:0.5;">MANUAL OVERRIDE:</div>
-          <select id="font-display-select" class="select-field" style="margin-top: 10px;">
-            <option value="'Bebas Neue', sans-serif">Bebas Neue (Structural)</option>
-            <option value="'Oswald', sans-serif">Oswald (Industrial)</option>
-            <option value="'Playfair Display', serif">Playfair (Editorial)</option>
-            <option value="'Space Grotesk', sans-serif">Space Grotesk (Tech)</option>
-            <option value="'Anton', sans-serif">Anton (Impact)</option>
-          </select>
-          <select id="font-body-select" class="select-field" style="margin-top: 10px;">
-            <option value="'IBM Plex Mono', monospace">IBM Plex Mono (Technical)</option>
-            <option value="'Inter', sans-serif">Inter (Legibility)</option>
-            <option value="'Work Sans', sans-serif">Work Sans (Clean)</option>
-            <option value="'Lora', serif">Lora (Classic Print)</option>
-          </select>
-        </div>
+        <button id="randomize-fonts-btn" class="btn scrambler">Infinite Font Pairing</button>
+        <button id="reset-font-btn" class="btn btn-outline scrambler" style="border-color: var(--accent-color); color: var(--accent-color); margin-top: 20px;">Reset UI Fonts</button>
       </div>
       
-      <div class="main-stage" style="background: #E8E4DF;">
+      <div class="main-stage" style="background: transparent;">
         <div class="typo-stage" id="typo-stage-container">
           <div class="typo-meta" id="typo-meta-display">DISPLAY: BEBAS NEUE // BODY: IBM PLEX MONO</div>
-          <div class="typo-display" id="typo-headline">ARCHITECTURAL PRECISION</div>
+          <div class="typo-display" id="typo-headline">INDRAJEET PISDA</div>
           <div class="typo-body" id="typo-paragraph">
-            At Digital Trade, we don't just create images; we build structural visual systems. Bridging the gap between raw creativity and engineered functionality. Clutter kills conversion. We strip away the unnecessary to deploy high-performance websites and striking graphic identities that scale brands globally. Form follows function. Every pixel, every line of code, and every vector curve must serve a distinct purpose in driving user action. Relentless iteration ensures we build systems that are modular, scalable, and ready to pivot when market dynamics shift.
+            At Digital Trade, we don't just create images; we build structural visual systems. Bridging the gap between raw creativity and engineered functionality. Clutter kills conversion. We strip away the unnecessary to deploy high-performance websites and striking graphic identities that scale brands globally. Every pixel, every line of code, and every vector curve must serve a distinct purpose.
           </div>
         </div>
       </div>
@@ -284,285 +265,272 @@ main { flex: 1 0 auto; width: 100%; padding-top: var(--header-height); }
 <script>
 document.addEventListener('DOMContentLoaded', () => {
 
-  // --- 1. SPA ROUTING ---
+  // --- SYSTEM STATE & GLOBAL VARIABLES ---
+  const root = document.documentElement;
+  
+  // Default Agency State
+  const defaultState = {
+    bg: '#F4F0EA', fg: '#050505', accent: '#FF3300',
+    display: "'Bebas Neue', sans-serif", body: "'IBM Plex Mono', monospace"
+  };
+
+  // Active Generated State
+  let activeState = { ...defaultState };
+
+  const globalToggle = document.getElementById('global-override-toggle');
+
+  // Apply State to DOM
+  function syncUI() {
+    if (globalToggle.checked) {
+      root.style.setProperty('--bg-color', activeState.bg);
+      root.style.setProperty('--fg-color', activeState.fg);
+      root.style.setProperty('--accent-color', activeState.accent);
+      root.style.setProperty('--display-font', activeState.display);
+      root.style.setProperty('--body-font', activeState.body);
+    } else {
+      root.style.setProperty('--bg-color', defaultState.bg);
+      root.style.setProperty('--fg-color', defaultState.fg);
+      root.style.setProperty('--accent-color', defaultState.accent);
+      root.style.setProperty('--display-font', defaultState.display);
+      root.style.setProperty('--body-font', defaultState.body);
+    }
+  }
+
+  globalToggle.addEventListener('change', syncUI);
+
+  // --- SPA ROUTING ---
   const views = document.querySelectorAll('.view-section');
   const navLinks = document.querySelectorAll('.nav-link');
-
-  function navigateTo(targetId) {
-      views.forEach(v => v.classList.remove('active'));
-      const targetView = document.getElementById(targetId);
-      if(targetView) {
-          void targetView.offsetWidth;
-          targetView.classList.add('active');
-      }
-      navLinks.forEach(a => a.classList.remove('active-link'));
-      const activeLink = document.querySelector(`.nav-link[data-target="${targetId}"]`);
-      if(activeLink) activeLink.classList.add('active-link');
-  }
 
   document.querySelectorAll('.nav-trigger').forEach(trigger => {
       trigger.addEventListener('click', function(e) {
           e.preventDefault();
           const targetId = this.getAttribute('data-target');
-          navigateTo(targetId);
+          views.forEach(v => v.classList.remove('active'));
+          document.getElementById(targetId).classList.add('active');
+          navLinks.forEach(a => a.classList.remove('active-link'));
+          this.classList.add('active-link');
       });
   });
 
-  // --- 2. SCRAMBLER EFFECT ---
+  // --- SCRAMBLER EFFECT ---
   const chars = '!<>-_/[]{}*^?#';
   document.querySelectorAll('.scrambler').forEach(el => {
-      const originalText = el.innerText;
+      const orig = el.innerText;
       el.addEventListener('mouseover', () => {
           if(el.dataset.animating === 'true') return;
           el.dataset.animating = 'true';
-          let iterations = 0;
-          const maxIterations = originalText.length;
-          const step = Math.max(0.3, maxIterations / 12); 
-          const interval = setInterval(() => {
-              el.innerText = originalText.split('').map((letter, index) => {
-                  if(index < iterations) return originalText[index];
-                  if(originalText[index] === ' ') return ' ';
-                  return chars[Math.floor(Math.random() * chars.length)];
-              }).join('');
-              if(iterations >= maxIterations) {
-                  clearInterval(interval);
-                  el.innerText = originalText;
-                  el.dataset.animating = 'false';
-              }
-              iterations += step;
+          let i = 0;
+          const int = setInterval(() => {
+              el.innerText = orig.split('').map((l, idx) => (idx < i || orig[idx] === ' ') ? orig[idx] : chars[Math.floor(Math.random()*chars.length)]).join('');
+              if(i >= orig.length) { clearInterval(int); el.innerText = orig; el.dataset.animating = 'false'; }
+              i += 0.5;
           }, 30);
       });
   });
 
-  // --- 3. GENERATOR LOGIC (SIMULATED DOM/SVG BUILDER) ---
-  const genForm = document.getElementById('generator-form');
-  const loader = document.getElementById('gen-loader');
-  const outputWrapper = document.getElementById('output-wrapper');
-  const downloadBtn = document.getElementById('download-btn');
-
-  genForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const name = document.getElementById('brand-name').value.toUpperCase();
-    const keyword = document.getElementById('brand-keyword').value.toUpperCase();
-    const type = document.getElementById('output-type').value;
-    const style = document.getElementById('aesthetic-style').value;
-
-    outputWrapper.style.display = 'none';
-    downloadBtn.style.display = 'none';
-    loader.style.display = 'block';
-
-    setTimeout(() => {
-      loader.style.display = 'none';
-      outputWrapper.style.display = 'flex';
-      downloadBtn.style.display = 'block';
-      generateSVG(name, keyword, type, style);
-    }, 1200);
-  });
-
-  function generateSVG(name, keyword, type, style) {
-    let svgContent = '';
-    const initial = name.charAt(0);
-    
-    // Aesthetic Logic
-    let bgCol = style === 'minimal' ? '#F4F0EA' : (style === 'tech' ? '#050505' : '#1A1A1A');
-    let fgCol = style === 'minimal' ? '#050505' : (style === 'tech' ? '#00FF41' : '#D4AF37');
-    let accentCol = style === 'minimal' ? '#FF3300' : (style === 'tech' ? '#FFFFFF' : '#FFFFFF');
-    let fontFam = style === 'luxury' ? 'Playfair Display, serif' : 'Bebas Neue, sans-serif';
-
-    if (type === 'logo') {
-      svgContent = `
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" class="output-visual" style="max-width:400px; background:${bgCol}; border:2px solid #000;">
-          <circle cx="250" cy="200" r="120" fill="none" stroke="${accentCol}" stroke-width="8"/>
-          <text x="250" y="240" font-family="${fontFam}" font-size="140" fill="${fgCol}" font-weight="bold" text-anchor="middle">${initial}</text>
-          <text x="250" y="380" font-family="Space Mono, monospace" font-size="30" fill="${fgCol}" font-weight="bold" letter-spacing="10" text-anchor="middle">${name}</text>
-          <text x="250" y="420" font-family="Space Mono, monospace" font-size="14" fill="${accentCol}" letter-spacing="5" text-anchor="middle">IND // ${keyword}</text>
-        </svg>`;
-    } else if (type === 'bcard') {
-      // Business Card Layout
-      svgContent = `
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 400" class="output-visual" style="max-width:600px; background:${bgCol}; border:2px solid #000;">
-          <rect x="0" y="0" width="350" height="400" fill="${bgCol}" />
-          <text x="30" y="80" font-family="${fontFam}" font-size="40" fill="${fgCol}">${name}</text>
-          <rect x="30" y="100" width="50" height="4" fill="${accentCol}"/>
-          <text x="30" y="150" font-family="Space Mono, monospace" font-size="12" fill="${fgCol}" letter-spacing="2">${keyword} SERVICES</text>
-          <text x="30" y="320" font-family="IBM Plex Mono, monospace" font-size="12" fill="${fgCol}">T: +91 7646846030</text>
-          <text x="30" y="340" font-family="IBM Plex Mono, monospace" font-size="12" fill="${fgCol}">E: trade@digital.com</text>
-          <text x="30" y="360" font-family="IBM Plex Mono, monospace" font-size="12" fill="${fgCol}">HQ: DANTEWADA, CG</text>
-          
-          <rect x="350" y="0" width="350" height="400" fill="${fgCol}" />
-          <circle cx="525" cy="200" r="100" fill="none" stroke="${bgCol}" stroke-width="2" opacity="0.3"/>
-          <text x="525" y="230" font-family="${fontFam}" font-size="100" fill="${bgCol}" text-anchor="middle">${initial}</text>
-        </svg>`;
-    } else if (type === 'flyer') {
-      // Event Flyer
-      svgContent = `
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 800" class="output-visual" style="max-width:450px; background:${bgCol}; border:2px solid #000;">
-          <rect x="20" y="20" width="560" height="760" fill="none" stroke="${fgCol}" stroke-width="2"/>
-          <text x="40" y="80" font-family="Space Mono, monospace" font-size="16" fill="${accentCol}" letter-spacing="4">01 / DEPLOYMENT</text>
-          <text x="40" y="200" font-family="${fontFam}" font-size="100" fill="${fgCol}" font-weight="bold">${name}</text>
-          <text x="40" y="300" font-family="${fontFam}" font-size="80" fill="${fgCol}" font-weight="bold" opacity="0.5">${keyword}</text>
-          <rect x="40" y="350" width="520" height="200" fill="${fgCol}"/>
-          <text x="300" y="470" font-family="${fontFam}" font-size="60" fill="${bgCol}" text-anchor="middle">EVENT / LAUNCH</text>
-          <text x="40" y="650" font-family="IBM Plex Mono, monospace" font-size="16" fill="${fgCol}">LOCATION: AWARBHATA, DANTEWADA</text>
-          <text x="40" y="680" font-family="IBM Plex Mono, monospace" font-size="16" fill="${fgCol}">STATUS: SYSTEM ONLINE</text>
-          <circle cx="520" cy="720" r="40" fill="${accentCol}"/>
-        </svg>`;
-    } else if (type === 'brochure') {
-      // Tri-fold Brochure Blueprint
-      svgContent = `
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 600" class="output-visual" style="max-width:700px; background:${bgCol}; border:2px solid #000;">
-          <rect x="0" y="0" width="300" height="600" fill="${bgCol}" stroke="${fgCol}" stroke-width="1"/>
-          <rect x="300" y="0" width="300" height="600" fill="${bgCol}" stroke="${fgCol}" stroke-width="1"/>
-          <rect x="600" y="0" width="300" height="600" fill="${fgCol}" stroke="${bgCol}" stroke-width="1"/>
-          
-          <text x="30" y="80" font-family="Space Mono, monospace" font-size="14" fill="${accentCol}">01 // INFO</text>
-          <rect x="30" y="120" width="240" height="150" fill="${fgCol}" opacity="0.1"/>
-          <text x="30" y="320" font-family="IBM Plex Mono, monospace" font-size="10" fill="${fgCol}">STRUCTURAL DATA PLACEHOLDER.</text>
-          <text x="30" y="340" font-family="IBM Plex Mono, monospace" font-size="10" fill="${fgCol}">ENGINEERED FOR CONVERSION.</text>
-          
-          <text x="330" y="80" font-family="Space Mono, monospace" font-size="14" fill="${accentCol}">02 // ${keyword}</text>
-          <circle cx="450" cy="300" r="80" fill="none" stroke="${fgCol}" stroke-width="2"/>
-          <circle cx="450" cy="300" r="60" fill="none" stroke="${accentCol}" stroke-width="1" stroke-dasharray="5,5"/>
-          
-          <text x="630" y="250" font-family="${fontFam}" font-size="70" fill="${bgCol}">${name}</text>
-          <text x="630" y="300" font-family="Space Mono, monospace" font-size="16" fill="${accentCol}" letter-spacing="4">${keyword} SYS</text>
-          <rect x="630" y="500" width="100" height="4" fill="${bgCol}"/>
-        </svg>`;
-    } else {
-      // Apparel
-      svgContent = `
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 500" class="output-visual" style="max-width:350px; background:${bgCol}; border:2px solid #000;">
-          <text x="200" y="100" font-family="Space Mono, monospace" font-size="12" fill="${accentCol}" letter-spacing="5" text-anchor="middle">EST. 2026</text>
-          <text x="200" y="250" font-family="${fontFam}" font-size="80" fill="${fgCol}" font-weight="bold" text-anchor="middle" transform="rotate(-10 200 250)">${name}</text>
-          <rect x="100" y="350" width="200" height="60" fill="none" stroke="${fgCol}" stroke-width="3"/>
-          <text x="200" y="385" font-family="Space Mono, monospace" font-size="18" fill="${fgCol}" font-weight="bold" letter-spacing="4" text-anchor="middle">${keyword}</text>
-        </svg>`;
-    }
-    outputWrapper.innerHTML = svgContent;
-  }
-
-  // --- 4. COLOR HARMONY & INFINITE RANDOM LOGIC ---
-  const colorBtn = document.getElementById('generate-colors-btn');
-  const paletteOutput = document.getElementById('palette-output');
-  const ruleSelect = document.getElementById('color-rule');
-
-  // Utility: Random Hex Generator
+  // --- UTILS ---
   const randomHex = () => '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0').toUpperCase();
-  
-  // Utility: Calculate Luminance for contrast
-  function getContrastYIQ(hexcolor){
-    hexcolor = hexcolor.replace("#", "");
-    var r = parseInt(hexcolor.substr(0,2),16);
-    var g = parseInt(hexcolor.substr(2,2),16);
-    var b = parseInt(hexcolor.substr(4,2),16);
-    var yiq = ((r*299)+(g*587)+(b*114))/1000;
-    return (yiq >= 128) ? '#000000' : '#FFFFFF';
-  }
+  const getContrast = (hex) => {
+    const r = parseInt(hex.substr(1,2),16), g = parseInt(hex.substr(3,2),16), b = parseInt(hex.substr(5,2),16);
+    return ((r*299)+(g*587)+(b*114))/1000 >= 128 ? '#000000' : '#FFFFFF';
+  };
 
-  function renderPalette(rule) {
+  // --- COLOR ENGINE ---
+  const paletteOutput = document.getElementById('palette-output');
+
+  function buildPalette(colors) {
     paletteOutput.innerHTML = '';
-    let colors = [];
-
-    if (rule === 'duotone') {
-      colors = [randomHex(), randomHex()];
-    } else if (rule === 'random-multi') {
-      colors = [randomHex(), randomHex(), randomHex(), randomHex(), randomHex()];
-    } else if (rule === 'monochrome') {
-      // Base monochrome scale
-      colors = ['#050505', '#333333', '#777777', '#CCCCCC', '#F4F0EA'];
-    } else if (rule === 'brutalist') {
-      colors = ['#000000', '#FFFFFF', '#FF3300', '#00FF41', '#0000FF'];
-    }
-
-    colors.forEach(hex => {
-      const textCol = getContrastYIQ(hex);
+    colors.forEach((hex, index) => {
+      const textCol = getContrast(hex);
       const div = document.createElement('div');
       div.className = 'color-swatch';
       div.style.backgroundColor = hex;
       div.innerHTML = `<span class="hex-code" style="color:${textCol}; background:transparent; border-color:${textCol};">${hex}</span>`;
       paletteOutput.appendChild(div);
+
+      // Map to active state
+      if(index === 0) activeState.bg = hex;
+      if(index === 1) activeState.fg = hex;
+      if(index === 2) activeState.accent = hex;
     });
+    // Ensure fallback mapping if duotone
+    if(colors.length === 2) activeState.accent = colors[1]; 
+    syncUI();
   }
-  
-  colorBtn.addEventListener('click', () => renderPalette(ruleSelect.value));
-  renderPalette('duotone'); // Init
 
+  document.getElementById('generate-duotone-btn').addEventListener('click', () => buildPalette([randomHex(), randomHex()]));
+  document.getElementById('generate-multi-btn').addEventListener('click', () => buildPalette([randomHex(), randomHex(), randomHex(), randomHex(), randomHex()]));
+  document.getElementById('reset-color-btn').addEventListener('click', () => {
+    activeState.bg = defaultState.bg; activeState.fg = defaultState.fg; activeState.accent = defaultState.accent;
+    syncUI(); paletteOutput.innerHTML = '';
+  });
 
-  // --- 5. INFINITE TYPOGRAPHY ENGINE ---
+  // --- TYPOGRAPHY ENGINE ---
   const testInput = document.getElementById('typo-test-input');
   const headlineEl = document.getElementById('typo-headline');
   const bodyEl = document.getElementById('typo-paragraph');
   const metaEl = document.getElementById('typo-meta-display');
-  const typoStage = document.getElementById('typo-stage-container');
-  
-  // Massive list of Google Fonts for randomizer
-  const displayFonts = [
-    'Bebas Neue', 'Oswald', 'Playfair Display', 'Anton', 'Syne', 
-    'Montserrat', 'Cinzel', 'Righteous', 'Archivo Black', 'Teko',
-    'Abril Fatface', 'Prata', 'DM Serif Display', 'Rubik Mono One'
-  ];
-  
-  const bodyFonts = [
-    'IBM Plex Mono', 'Inter', 'Space Mono', 'Work Sans', 'Lora',
-    'Inconsolata', 'Karla', 'Fira Code', 'Courier Prime', 'Roboto Mono'
-  ];
 
-  // Dynamically load font from Google
+  // Expanded Infinite Font Arrays
+  const dFonts = ['Bebas Neue','Oswald','Playfair Display','Anton','Syne','Cinzel','Righteous','Archivo Black','Teko','Abril Fatface','Prata','DM Serif Display','Bungee','Lobster','Permanent Marker','Fjalla One','Cormorant Garamond'];
+  const bFonts = ['IBM Plex Mono','Inter','Space Mono','Work Sans','Lora','Inconsolata','Karla','Fira Code','Courier Prime','Roboto Mono','PT Sans','Open Sans','Source Code Pro','Quicksand'];
+
   function injectFont(fontName) {
-    const fontId = fontName.replace(/\s+/g, '-').toLowerCase();
-    if (!document.getElementById(fontId)) {
-      const link = document.createElement('link');
-      link.id = fontId;
-      link.rel = 'stylesheet';
+    const id = fontName.replace(/\s+/g, '-').toLowerCase();
+    if (!document.getElementById(id)) {
+      const link = document.createElement('link'); link.id = id; link.rel = 'stylesheet';
       link.href = `https://fonts.googleapis.com/css2?family=${fontName.replace(/\s+/g, '+')}:wght@300;400;700;900&display=swap`;
       document.head.appendChild(link);
     }
   }
 
-  function updateTypoManual() {
-    const dSelect = document.getElementById('font-display-select');
-    const bSelect = document.getElementById('font-body-select');
-    
-    // Inject if manual selection contains new fonts
-    injectFont(dSelect.options[dSelect.selectedIndex].text.split('(')[0].trim());
-    injectFont(bSelect.options[bSelect.selectedIndex].text.split('(')[0].trim());
-
-    headlineEl.style.fontFamily = dSelect.value;
-    bodyEl.style.fontFamily = bSelect.value;
-    headlineEl.innerText = testInput.value || "ARCHITECTURAL PRECISION";
-    
-    metaEl.innerText = `DISPLAY: ${dSelect.options[dSelect.selectedIndex].text.toUpperCase()} // BODY: ${bSelect.options[bSelect.selectedIndex].text.toUpperCase()}`;
-  }
-
-  document.getElementById('font-display-select').addEventListener('change', updateTypoManual);
-  document.getElementById('font-body-select').addEventListener('change', updateTypoManual);
-  testInput.addEventListener('input', () => { headlineEl.innerText = testInput.value || "ARCHITECTURAL PRECISION"; });
-
-  // Infinite Randomizer Logic
   document.getElementById('randomize-fonts-btn').addEventListener('click', () => {
-    const rDisplay = displayFonts[Math.floor(Math.random() * displayFonts.length)];
-    const rBody = bodyFonts[Math.floor(Math.random() * bodyFonts.length)];
+    const rD = dFonts[Math.floor(Math.random() * dFonts.length)];
+    const rB = bFonts[Math.floor(Math.random() * bFonts.length)];
     
-    injectFont(rDisplay);
-    injectFont(rBody);
-
-    // Fallbacks
-    let dFall = rDisplay === 'Playfair Display' || rDisplay === 'Prata' ? 'serif' : 'sans-serif';
-    let bFall = rBody.includes('Mono') || rBody.includes('Code') || rBody.includes('Courier') ? 'monospace' : 'sans-serif';
-
-    headlineEl.style.fontFamily = `'${rDisplay}', ${dFall}`;
-    bodyEl.style.fontFamily = `'${rBody}', ${bFall}`;
+    injectFont(rD); injectFont(rB);
     
-    metaEl.innerText = `[RANDOM] DISPLAY: ${rDisplay.toUpperCase()} // BODY: ${rBody.toUpperCase()}`;
+    const dFall = rD === 'Playfair Display' || rD === 'Prata' || rD === 'Cinzel' ? 'serif' : 'sans-serif';
+    const bFall = rB.includes('Mono') || rB.includes('Code') ? 'monospace' : 'sans-serif';
+
+    activeState.display = `'${rD}', ${dFall}`;
+    activeState.body = `'${rB}', ${bFall}`;
+    
+    metaEl.innerText = `DISPLAY: ${rD.toUpperCase()} // BODY: ${rB.toUpperCase()}`;
+    headlineEl.innerText = testInput.value || "INDRAJEET PISDA";
+    
+    // Update local preview regardless of global toggle
+    headlineEl.style.fontFamily = activeState.display;
+    bodyEl.style.fontFamily = activeState.body;
+    
+    syncUI();
   });
 
-  // Randomize Duotone Typo Mode
-  document.getElementById('randomize-typo-color-btn').addEventListener('click', () => {
-    const bg = randomHex();
-    const fg = randomHex();
-    typoStage.style.backgroundColor = bg;
-    typoStage.style.color = fg;
-    typoStage.style.borderColor = fg;
+  document.getElementById('reset-font-btn').addEventListener('click', () => {
+    activeState.display = defaultState.display; activeState.body = defaultState.body;
+    metaEl.innerText = `DISPLAY: BEBAS NEUE // BODY: IBM PLEX MONO`;
+    headlineEl.style.fontFamily = activeState.display;
+    bodyEl.style.fontFamily = activeState.body;
+    syncUI();
+  });
+
+  testInput.addEventListener('input', () => { headlineEl.innerText = testInput.value || "INDRAJEET PISDA"; });
+
+  // --- PROCEDURAL SVG ENGINE ---
+  const genForm = document.getElementById('generator-form');
+  const loader = document.getElementById('gen-loader');
+  const outputWrapper = document.getElementById('output-wrapper');
+  const exportControls = document.getElementById('export-controls');
+  let currentSVGString = "";
+
+  genForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    outputWrapper.style.display = 'none'; exportControls.style.display = 'none'; loader.style.display = 'block';
+
+    setTimeout(() => {
+      loader.style.display = 'none'; outputWrapper.style.display = 'flex'; exportControls.style.display = 'flex';
+      generateInfiniteSVG();
+    }, 1000);
+  });
+
+  function generateInfiniteSVG() {
+    const name = document.getElementById('brand-name').value.toUpperCase();
+    const key = document.getElementById('brand-keyword').value.toUpperCase();
+    const type = document.getElementById('output-type').value;
+
+    // Use Active State Colors (creates infinite variations combined with procedural logic)
+    const bg = activeState.bg; const fg = activeState.fg; const acc = activeState.accent;
+    const font = activeState.display;
+
+    let svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" width="100%" height="100%" class="output-visual" style="background:${bg}; border:2px solid ${fg};" id="generated-svg">`;
+    svg += `<rect width="800" height="800" fill="${bg}"/>`;
+
+    if (type === 'abstract') {
+      // Procedural Abstract Geometry
+      for(let i=0; i<20; i++) {
+        const x = Math.random()*800, y = Math.random()*800, r = Math.random()*200;
+        const color = Math.random() > 0.5 ? fg : acc;
+        if(Math.random() > 0.5) {
+          svg += `<circle cx="${x}" cy="${y}" r="${r}" fill="none" stroke="${color}" stroke-width="${Math.random()*10}" opacity="0.3"/>`;
+        } else {
+          svg += `<rect x="${x}" y="${y}" width="${r}" height="${r*1.5}" fill="none" stroke="${color}" stroke-width="2" opacity="0.2"/>`;
+        }
+      }
+      svg += `<text x="400" y="400" font-family="${font}" font-size="120" fill="${fg}" text-anchor="middle" dominant-baseline="middle">${name}</text>`;
+      svg += `<text x="400" y="500" font-family="monospace" font-size="20" fill="${acc}" text-anchor="middle" letter-spacing="10">${key}</text>`;
+      
+    } else if (type === 'logo') {
+      // Procedural Logo Structure
+      const shape = Math.floor(Math.random() * 3); // 0 circle, 1 square, 2 diamond
+      svg += `<g transform="translate(400, 350)">`;
+      if(shape === 0) svg += `<circle cx="0" cy="0" r="150" fill="${fg}"/>`;
+      if(shape === 1) svg += `<rect x="-150" y="-150" width="300" height="300" fill="${fg}"/>`;
+      if(shape === 2) svg += `<rect x="-120" y="-120" width="240" height="240" fill="${fg}" transform="rotate(45)"/>`;
+      svg += `<text x="0" y="40" font-family="${font}" font-size="160" fill="${bg}" text-anchor="middle">${name.charAt(0)}</text>`;
+      svg += `</g>`;
+      svg += `<text x="400" y="600" font-family="${font}" font-size="60" fill="${fg}" text-anchor="middle" letter-spacing="2">${name}</text>`;
+      svg += `<line x1="200" y1="630" x2="600" y2="630" stroke="${acc}" stroke-width="4"/>`;
+      svg += `<text x="400" y="670" font-family="monospace" font-size="14" fill="${fg}" text-anchor="middle" letter-spacing="8">SYS.${key}</text>`;
+      
+    } else if (type === 'poster') {
+      // Procedural Grid Poster
+      const divisions = Math.floor(Math.random() * 5) + 3; // 3 to 7
+      const step = 800 / divisions;
+      for(let i=0; i<=divisions; i++) {
+        svg += `<line x1="${i*step}" y1="0" x2="${i*step}" y2="800" stroke="${fg}" stroke-width="1" opacity="0.2"/>`;
+        svg += `<line x1="0" y1="${i*step}" x2="800" y2="${i*step}" stroke="${fg}" stroke-width="1" opacity="0.2"/>`;
+      }
+      svg += `<rect x="40" y="40" width="720" height="720" fill="none" stroke="${fg}" stroke-width="4"/>`;
+      svg += `<text x="60" y="100" font-family="monospace" font-size="18" fill="${acc}" letter-spacing="4">NO. ${Math.floor(Math.random()*9999)}</text>`;
+      
+      const splitName = name.split(' ');
+      let yOffset = 300;
+      splitName.forEach(word => {
+        svg += `<text x="60" y="${yOffset}" font-family="${font}" font-size="140" fill="${fg}" font-weight="bold">${word}</text>`;
+        yOffset += 120;
+      });
+      svg += `<circle cx="680" cy="700" r="50" fill="${acc}"/>`;
+    }
+
+    svg += `</svg>`;
+    currentSVGString = svg;
+    outputWrapper.innerHTML = svg;
+  }
+
+  // --- EXPORT LOGIC ---
+  document.getElementById('export-svg').addEventListener('click', () => {
+    if(!currentSVGString) return;
+    const blob = new Blob([currentSVGString], {type: 'image/svg+xml;charset=utf-8'});
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url; link.download = 'procedural-export.svg';
+    document.body.appendChild(link); link.click(); document.body.removeChild(link);
+  });
+
+  document.getElementById('export-png').addEventListener('click', () => {
+    if(!currentSVGString) return;
+    const canvas = document.getElementById('render-canvas');
+    const ctx = canvas.getContext('2d');
+    
+    // Create an Image from the SVG
+    const img = new Image();
+    const svgData = new Blob([currentSVGString], {type: 'image/svg+xml;charset=utf-8'});
+    const url = URL.createObjectURL(svgData);
+    
+    img.onload = function() {
+      canvas.width = 800; // Match SVG viewBox
+      canvas.height = 800;
+      ctx.drawImage(img, 0, 0);
+      URL.revokeObjectURL(url);
+      
+      // Export to PNG
+      const pngUrl = canvas.toDataURL('image/png');
+      const link = document.createElement('a');
+      link.href = pngUrl; link.download = 'procedural-export.png';
+      document.body.appendChild(link); link.click(); document.body.removeChild(link);
+    };
+    img.src = url;
   });
 
 });
